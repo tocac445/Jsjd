@@ -102,7 +102,7 @@
 </head>
 <body>
   <div id="dashboard">
-    <div id="user-info">@Gay2882</div>
+    <div id="user-info">@anchi1258</div>
 
     <div class="stats">
       <div class="stat-box">
@@ -125,7 +125,7 @@
     <div id="chart-container">
       <div id="req-per-sec-label">
         <i class="fas fa-tachometer-alt"></i>
-        <span id="req-per-sec-value">--</span> req/s
+        <span id="req-per-sec-value">--</span>
       </div>
       <div id="chart-title">Request Graph Overview</div>
       <div id="chart"></div>
@@ -135,24 +135,18 @@
   <script src="https://code.highcharts.com/highcharts.js"></script>
   <script>
     function getQueryParam(name) {
-      // Lấy query param từ URL
       const urlParams = new URLSearchParams(window.location.search);
       return urlParams.get(name);
     }
 
     window.onload = () => {
-      // Lấy data chuỗi JSON từ param "data"
       const dataParam = getQueryParam('data');
-
       let data = [];
       try {
         if (dataParam) {
-          // decodeURIComponent vì query param được encode
           const decoded = decodeURIComponent(dataParam);
-          // chuyển chuỗi JSON thành array
-          data = JSON.parse(decoded);
-          // đảm bảo data là mảng số
-          if (!Array.isArray(data) || !data.every(x => typeof x === 'number')) {
+          data = JSON.parse(decoded).map(n => Math.round(n)); // Làm tròn về số nguyên
+          if (!Array.isArray(data) || !data.every(x => Number.isInteger(x))) {
             data = [];
           }
         }
@@ -163,14 +157,14 @@
 
       const total = data.reduce((a, b) => a + b, 0);
       const peak = data.length ? Math.max(...data) : 0;
-      const avg = data.length ? (total / data.length) : 0;
+      const avg = data.length ? Math.round(total / data.length) : 0;
 
       const format = n => n.toLocaleString();
 
       document.getElementById('avg-data').textContent = data.length ? format(avg) : '--';
       document.getElementById('peak-data').textContent = data.length ? format(peak) : '--';
       document.getElementById('total-data').textContent = data.length ? format(total) : '--';
-      document.getElementById('req-per-sec-value').textContent = data.length ? data[data.length - 1] : '--';
+      document.getElementById('req-per-sec-value').textContent = data.length ? format(data[data.length - 1]) : '--';
 
       Highcharts.chart('chart', {
         chart: {
@@ -185,7 +179,8 @@
         yAxis: {
           title: { text: '' },
           gridLineColor: '#2e7d32',
-          labels: { style: { color: '#a5d6a7' } }
+          labels: { style: { color: '#a5d6a7' } },
+          allowDecimals: false // Chỉ hiện số nguyên
         },
         series: [{
           name: 'Requests/sec',
@@ -203,7 +198,7 @@
           backgroundColor: '#212121',
           borderColor: '#00e676',
           style: { color: '#fff' },
-          valueSuffix: ' req/s'
+          valueDecimals: 0
         },
         credits: { enabled: false }
       });
